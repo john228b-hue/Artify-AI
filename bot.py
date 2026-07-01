@@ -7,7 +7,11 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
 from config import BOT_TOKEN
-from handlers import common, generate, admin, chat
+from common import router as common_router
+from generate import router as generate_router
+from admin import router as admin_router
+from chat import router as chat_router
+
 from keep_alive import keep_alive
 
 
@@ -25,10 +29,12 @@ async def main() -> None:
 
     dp = Dispatcher(storage=MemoryStorage())
 
-    dp.include_router(admin.router)
-    dp.include_router(common.router)
-    dp.include_router(generate.router)
-    dp.include_router(chat.router)
+dp.include_router(admin_router)
+​dp.include_router(common.router)
+​dp.include_router(generate.router)
+​dp.include_router(chat.router)
+    
+    
 
     logger.info("🚀 البوت يعمل الآن... اضغط CTRL+C للإيقاف")
 

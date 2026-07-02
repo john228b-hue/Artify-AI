@@ -1,50 +1,35 @@
 import asyncio
 import logging
-
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
-
+from aiohttp import web
 from config import BOT_TOKEN
 from common import router as common_router
 from generate import router as generate_router
 from admin import router as admin_router
 from chat import router as chat_router
 
-from keep_alive import keep_alive
-
-
-async def main() -> None:
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
-    )
-    logger = logging.getLogger(__name__)
-
-    bot = Bot(
-        token=BOT_TOKEN,
-        default=DefaultBotProperties(parse_mode=ParseMode.HTML)
-    )
-
-    dp = Dispatcher(storage=MemoryStorage())
+logging.basicConfig(level=logging.INFO)
+bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+dp = Dispatcher(storage=MemoryStorage())
 
 dp.include_router(admin_router)
-​dp.include_router(common.router)
-​dp.include_router(generate.router)
-​dp.include_router(chat.router)
-    
-    
+dp.include_router(common_router)
+dp.include_router(generate_router)
+dp.include_router(chat_router)
 
-    logger.info("🚀 البوت يعمل الآن... اضغط CTRL+C للإيقاف")
+async def web_server():
+    app = web.Application()
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', 8080)
+    await site.start()
 
-    await bot.delete_webhook(drop_pending_updates=True)
+async def main():
+    await web_server()
     await dp.start_polling(bot)
 
-
 if __name__ == "__main__":
-    keep_alive()
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("⛔ تم إيقاف البوت يدوياً.")
+    asyncio.run(main())
